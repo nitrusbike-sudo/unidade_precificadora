@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0d0d0d">
+  <title>Nitros Bike - Precificação e OS</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    :root {
+      --bg-main: #0d0d0d;
+      --bg-card: #181818;
+      --bg-input: #222222;
+      --border: #2e2e2e;
+      --red: #e60000;
+      --red-hover: #ff1a1a;
+      --red-dim: rgba(230, 0, 0, 0.15);
+      --text-main: #ffffff;
+      --text-muted: #9e9e9e;
+      --success: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      overflow-x: hidden;
+    }
+
+    /* TOPBAR */
+    header {
+      background-color: var(--bg-card);
+      border-bottom: 2px solid var(--red);
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      width: 100%;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .brand h1 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .brand h1 span {
+      color: var(--red);
+    }
+
+    .user-badge {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-badge strong {
+      color: var(--text-main);
+    }
+
+    .btn-upload {
+      background-color: var(--bg-input);
+      color: var(--text-main);
+      border: 1px solid var(--red);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .btn-upload:hover {
+      background-color: var(--red);
+    }
+
+    /* LAYOUT PRINCIPAL */
+    .main-container {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 420px;
+      gap: 16px;
+      padding: 16px;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      flex: 1;
+    }
+
+    /* COLUNA ESQUERDA: BUSCA E CATÁLOGO */
+    .catalog-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 0;
+      width: 100%;
+    }
+
+    .search-box {
+      position: relative;
+      width: 100%;
+    }
+
+    .search-input {
+      width: 100%;
+      background-color: var(--bg-card);
+      border: 2px solid var(--border);
+      color: var(--text-main);
+      padding: 14px 40px 14px 14px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .search-input:focus {
+      border-color: var(--red);
+    }
+
+    .clear-search {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: none;
+    }
+
+    /* FILTROS DE CATEGORIA */
+    .categories-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      width: 100%;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .categories-bar::-webkit-scrollbar {
+      height: 3px;
+    }
+
+    .cat-pill {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .cat-pill.active {
+      background-color: var(--red);
+      color: var(--text-main);
+      border-color: var(--red);
+    }
+
+    /* LISTA DE PRODUTOS */
+    .catalog-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .item-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .item-info {
+      flex: 1;
+      min-width: 0;
+      word-wrap: break-word;
+    }
+
+    .item-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+      flex-wrap: wrap;
+    }
+
+    .item-sku {
+      font-size: 0.7rem;
+      background-color: var(--bg-input);
+      color: var(--text-muted);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+
+    .item-cat {
+      font-size: 0.72rem;
+      color: var(--red);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .item-name {
+      font-size: 0.98rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+
+    .item-prices {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    .item-prices strong {
+      color: var(--text-main);
+    }
+
+    .item-note {
+      margin-top: 6px;
+      font-size: 0.76rem;
+      color: #ffb74d;
+      background: rgba(255, 183, 77, 0.1);
+      padding: 4px 8px;
+      border-left: 2px solid #ffb74d;
+      border-radius: 2px;
+    }
+
+    .btn-add {
+      background-color: var(--red);
+      color: var(--text-main);
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .btn-add:hover:not(:disabled) {
+      background-color: var(--red-hover);
+    }
+
+    .btn-add:disabled {
+      background-color: var(--bg-input);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      cursor: not-allowed;
+    }
+
+    /* COLUNA DIREITA: CARRINHO */
+    .cart-section {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      height: fit-content;
+      position: sticky;
+      top: 72px;
+      min-width: 0;
+      width: 100%;
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* SELETOR ORDEM DE SERVIÇO VS SERVIÇO RÁPIDO */
+    .service-type-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      background-color: var(--bg-main);
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .type-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 10px 6px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .type-btn.active {
+      background-color: var(--red);
+      color: var(--text-main);
+    }
+
+    .edit-sr-num {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #fff;
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: 0.72rem;
+      cursor: pointer;
+    }
+
+    /* ITENS DO CARRINHO */
+    .cart-items {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 340px;
+      overflow-y: auto;
+    }
+
+    .cart-empty {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 28px 10px;
+      font-size: 0.9rem;
+    }
+
+    .cart-item {
+      background-color: var(--bg-main);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .cart-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .cart-item-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .cart-item-subtotal {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-main);
+      white-space: nowrap;
+    }
+
+    .cart-item-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .qty-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px 6px;
+    }
+
+    .qty-btn {
+      background: none;
+      border: none;
+      color: var(--red);
+      font-size: 1.1rem;
+      font-weight: 800;
+      width: 26px;
+      height: 26px;
+      cursor: pointer;
+    }
+
+    .qty-val {
+      font-size: 0.88rem;
+      font-weight: 700;
+      min-width: 18px;
+      text-align: center;
+    }
+
+    .labor-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: var(--text-main);
+      cursor: pointer;
+      user-select: none;
+      background-color: var(--bg-card);
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    .labor-toggle input {
+      accent-color: var(--red);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    .btn-remove-item {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    /* MODIFICAR VALOR (DESCONTO / ACRÉSCIMO) */
+    .mod-toggle-btn {
+      background-color: var(--bg-input);
+      border: 1px dashed var(--border);
+      color: var(--text-muted);
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .mod-toggle-btn.active {
+      border-color: var(--red);
+      color: var(--text-main);
+      background-color: var(--red-dim);
+    }
+
+    .mod-box {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      background-color: var(--bg-main);
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .mod-box.show {
+      display: flex;
+    }
+
+    .mod-type-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .mod-type-btn {
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      background-color: var(--bg-card);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .mod-type-btn.active {
+      background-color: var(--red);
+      color: var(--text-main);
+      border-color: var(--red);
+    }
+
+    .mod-inputs {
+      display: grid;
+      grid-template-columns: 1fr 105px;
+      gap: 8px;
+    }
+
+    .input-sm {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 9px 10px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      outline: none;
+      width: 100%;
+    }
+
+    .input-sm:focus {
+      border-color: var(--red);
+    }
+
+    /* PAGAMENTO */
+    .payment-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+    }
+
+    .pay-btn {
+      background-color: var(--bg-main);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .pay-btn.active {
+      border-color: var(--red);
+      background-color: var(--red-dim);
+      color: var(--text-main);
+    }
+
+    /* TOTAL E BOTÃO FINALIZAR */
+    .cart-footer {
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1.15rem;
+      font-weight: 800;
+    }
+
+    .total-val {
+      color: var(--red);
+      font-size: 1.35rem;
+    }
+
+    .btn-finalize {
+      background-color: var(--red);
+      color: var(--text-main);
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      width: 100%;
+    }
+
+    /* CAIXA DE TEXTO GERADO */
+    .output-box {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      background-color: var(--bg-main);
+      border: 2px solid var(--red);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 4px;
+    }
+
+    .output-box.show {
+      display: flex;
+    }
+
+    .output-text {
+      font-size: 0.85rem;
+      line-height: 1.4;
+      color: var(--text-main);
+      background-color: var(--bg-card);
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      word-break: break-word;
+      user-select: all;
+    }
+
+    .output-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .btn-copy {
+      background-color: var(--bg-input);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      padding: 11px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+
+    .btn-complete {
+      background-color: var(--success);
+      color: #000;
+      border: none;
+      padding: 11px;
+      border-radius: 6px;
+      font-weight: 800;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+
+    /* MODAL PRIMEIRO ACESSO (COMPATÍVEL COM ANDROID ANTIGO) */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.92);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      padding: 16px;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal-card {
+      background-color: var(--bg-card);
+      border: 2px solid var(--red);
+      border-radius: 10px;
+      padding: 24px;
+      max-width: 400px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .modal-card h2 {
+      font-size: 1.2rem;
+    }
+
+    .modal-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* BARRA INFERIOR MOBILE */
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: var(--bg-card);
+      border-top: 2px solid var(--red);
+      grid-template-columns: 1fr 1fr;
+      z-index: 150;
+    }
+
+    .mob-tab {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 15px 10px;
+      font-size: 0.9rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .mob-tab.active {
+      background-color: var(--red);
+      color: var(--text-main);
+    }
+
+    /* RESPONSIVIDADE TABLET / CELULAR */
+    @media (max-width: 899px) {
+      body {
+        padding-bottom: 65px;
+      }
+      .main-container {
+        grid-template-columns: minmax(0, 1fr);
+        padding: 12px;
+      }
+      .cart-section {
+        position: static;
+        display: none;
+      }
+      .cart-section.mob-active {
+        display: flex;
+      }
+      .catalog-section.mob-hidden {
+        display: none;
+      }
+      .mobile-nav {
+        display: grid;
+      }
+    }
+
+    /* AJUSTE ESPECÍFICO PARA CELULAR: BOTÃO ADICIONAR LARGURA TOTAL */
+    @media (max-width: 600px) {
+      .item-card {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+      .btn-add {
+        width: 100%;
+        padding: 12px;
+        text-align: center;
+        font-size: 0.92rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- MODAL DE IDENTIFICAÇÃO PERMANENTE -->
+  <div id="userModal" class="modal-overlay">
+    <div class="modal-card">
+      <h2>Identificação do Atendente</h2>
+      <p>Digite seu nome. Ele ficará salvo permanentemente neste aparelho e sairá no final de todos os resumos de serviço.</p>
+      <input type="text" id="userNameInput" class="search-input" placeholder="Ex: Jean" autocomplete="off">
+      <button id="saveUserBtn" class="btn-finalize">Salvar Permanentemente</button>
+    </div>
+  </div>
+
+  <!-- TOPO -->
+  <header>
+    <div class="brand">
+      <h1>NITROS <span>BIKE</span></h1>
+      <div class="user-badge">Atendente: <strong id="displayUserName">---</strong></div>
+    </div>
+    <div>
+      <!-- Sem trava de extensão restrita para funcionar em qualquer Android antigo -->
+      <input type="file" id="jsonFileInput" style="display: none;">
+      <button class="btn-upload" onclick="document.getElementById('jsonFileInput').click()">
+        📂 Inserir Valores
+      </button>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <div class="main-container">
+    
+    <!-- COLUNA 1: BUSCA E CATÁLOGO -->
+    <section id="catalogView" class="catalog-section">
+      <div class="search-box">
+        <input type="text" id="searchInput" class="search-input" placeholder="Pesquisar peça, serviço ou código...">
+        <button id="clearSearchBtn" class="clear-search" title="Limpar">✕</button>
+      </div>
+
+      <div id="categoriesBar" class="categories-bar"></div>
+
+      <div id="catalogList" class="catalog-list"></div>
+    </section>
+
+    <!-- COLUNA 2: CARRINHO E FINALIZAÇÃO -->
+    <section id="cartView" class="cart-section">
+      <div class="section-title">
+        <span>Resumo do Atendimento</span>
+        <button class="btn-remove-item" onclick="clearCart()">Limpar tudo</button>
+      </div>
+
+      <!-- SELETOR TIPO DE SERVIÇO -->
+      <div class="service-type-toggle">
+        <button id="btnTypeOS" class="type-btn active" onclick="setServiceType('OS')">
+          Ordem de Serviço
+        </button>
+        <button id="btnTypeSR" class="type-btn" onclick="setServiceType('SR')">
+          <span>Serviço Rápido #<span id="srCounterDisplay">001</span></span>
+          <span class="edit-sr-num" onclick="editSrCounter(event)" title="Ajustar numeração">✎</span>
+        </button>
+      </div>
+
+      <!-- LISTA DO CARRINHO -->
+      <div id="cartItemsList" class="cart-items"></div>
+
+      <!-- DESCONTO / ACRÉSCIMO -->
+      <button id="modToggleBtn" class="mod-toggle-btn" onclick="toggleModificationBox()">
+        + Modificar Valor (Desconto / Acréscimo)
+      </button>
+
+      <div id="modBox" class="mod-box">
+        <div class="mod-type-row">
+          <button id="btnModDiscount" class="mod-type-btn active" onclick="setModType('discount')">- Desconto</button>
+          <button id="btnModSurcharge" class="mod-type-btn" onclick="setModType('surcharge')">+ Acréscimo</button>
+        </div>
+        <div class="mod-inputs">
+          <input type="text" id="modReason" class="input-sm" placeholder="Motivo" oninput="updateCartUI()">
+          <input type="number" id="modValue" class="input-sm" placeholder="Valor R$" min="0" step="0.50" oninput="updateCartUI()">
+        </div>
+      </div>
+
+      <!-- FORMA DE PAGAMENTO -->
+      <div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600;">Forma de Pagamento:</div>
+        <div class="payment-grid">
+          <button class="pay-btn active" onclick="setPayment('Pix', this)">Pix</button>
+          <button class="pay-btn" onclick="setPayment('Dinheiro', this)">Dinheiro</button>
+          <button class="pay-btn" onclick="setPayment('Cartão de Débito', this)">Cartão Débito</button>
+          <button class="pay-btn" onclick="setPayment('Cartão de Crédito', this)">Cartão Crédito</button>
+        </div>
+      </div>
+
+      <!-- RODAPÉ E BOTÃO FINALIZAR -->
+      <div class="cart-footer">
+        <div class="total-row">
+          <span>Total:</span>
+          <span id="cartTotalDisplay" class="total-val">R$ 0,00</span>
+        </div>
+        <button class="btn-finalize" onclick="generateSummaryText()">Finalizar e Gerar Texto</button>
+
+        <!-- SAÍDA EM LINHA ÚNICA -->
+        <div id="outputBox" class="output-box">
+          <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 700;">Descrição detalhada (linha única):</div>
+          <div id="outputText" class="output-text"></div>
+          <div class="output-actions">
+            <button class="btn-copy" onclick="copyOnly()">📋 Só Copiar</button>
+            <button class="btn-complete" onclick="copyAndFinish()">✅ Copiar e Novo</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- BARRA MOBILE -->
+  <nav class="mobile-nav">
+    <button id="mobTabCatalog" class="mob-tab active" onclick="switchMobileTab('catalog')">
+      🔍 Catálogo
+    </button>
+    <button id="mobTabCart" class="mob-tab" onclick="switchMobileTab('cart')">
+      🛒 Carrinho (<span id="mobCartCount">0</span>)
+    </button>
+  </nav>
+
+  <script>
+    var KEY_USER = 'nitros_usuario';
+    var KEY_CATALOG = 'nitros_catalogo';
+    var KEY_SR_COUNTER = 'nitros_contador_sr';
+
+    var catalog = [];
+    var cart = [];
+    var activeCategory = 'Todos';
+    var serviceType = 'OS';
+    var modActive = false;
+    var modType = 'discount';
+    var paymentMethod = 'Pix';
+
+    window.addEventListener('DOMContentLoaded', function() {
+      checkUserIdentity();
+      loadSrCounter();
+      loadCatalogFromStorage();
+      setupSearchEvents();
+
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(function() {});
+      }
+    });
+
+    function padZero(num) {
+      var s = String(num);
+      while (s.length < 3) s = '0' + s;
+      return s;
+    }
+
+    function checkUserIdentity() {
+      var savedUser = localStorage.getItem(KEY_USER);
+      var modal = document.getElementById('userModal');
+      var display = document.getElementById('displayUserName');
+
+      if (!savedUser || savedUser.replace(/\s+/g, '') === '') {
+        modal.classList.add('show');
+        document.getElementById('saveUserBtn').onclick = function() {
+          var val = document.getElementById('userNameInput').value.trim();
+          if (!val) {
+            alert('Por favor, digite seu nome para continuar.');
+            return;
+          }
+          localStorage.setItem(KEY_USER, val);
+          display.textContent = val;
+          modal.classList.remove('show');
+        };
+      } else {
+        display.textContent = savedUser;
+      }
+    }
+
+    function getSrCounter() {
+      var num = parseInt(localStorage.getItem(KEY_SR_COUNTER), 10);
+      if (isNaN(num) || num < 1) {
+        num = 1;
+        localStorage.setItem(KEY_SR_COUNTER, num);
+      }
+      return num;
+    }
+
+    function loadSrCounter() {
+      var num = getSrCounter();
+      document.getElementById('srCounterDisplay').textContent = padZero(num);
+    }
+
+    function editSrCounter(e) {
+      if (e && e.stopPropagation) e.stopPropagation();
+      var current = getSrCounter();
+      var input = prompt('Digite o número atual para o Serviço Rápido:', current);
+      if (input !== null) {
+        var parsed = parseInt(input, 10);
+        if (!isNaN(parsed) && parsed > 0) {
+          localStorage.setItem(KEY_SR_COUNTER, parsed);
+          loadSrCounter();
+          hideOutputBox();
+        }
+      }
+    }
+
+    function loadCatalogFromStorage() {
+      var saved = localStorage.getItem(KEY_CATALOG);
+      if (saved) {
+        try {
+          catalog = JSON.parse(saved);
+        } catch (e) {
+          catalog = [];
+        }
+      }
+      renderCategories();
+      renderCatalog();
+      updateCartUI();
+    }
+
+    document.getElementById('jsonFileInput').addEventListener('change', function(e) {
+      var file = e.target.files[0];
+      if (!file) return;
+
+      var reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          var rawText = evt.target.result.replace(/^\uFEFF/, '').trim();
+          var json = JSON.parse(rawText);
+          var newItems = Array.isArray(json) ? json : (json.catalog || []);
+
+          if (!Array.isArray(newItems) || newItems.length === 0) {
+            alert('Formato de arquivo inválido. Verifique se o JSON contém a lista "catalog".');
+            return;
+          }
+
+          localStorage.removeItem(KEY_CATALOG);
+          localStorage.setItem(KEY_CATALOG, JSON.stringify(newItems));
+
+          catalog = newItems;
+          cart = [];
+          activeCategory = 'Todos';
+          renderCategories();
+          renderCatalog();
+          updateCartUI();
+          alert('Catálogo atualizado com sucesso! (' + newItems.length + ' itens carregados)');
+        } catch (err) {
+          alert('Erro ao ler o arquivo. Certifique-se de selecionar o arquivo .json correto.');
+        }
+        e.target.value = '';
+      };
+      reader.readAsText(file, 'UTF-8');
+    });
+
+    function normalizeStr(str) {
+      var s = (str || '').toString().toLowerCase();
+      if (s.normalize) {
+        return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      }
+      return s;
+    }
+
+    function setupSearchEvents() {
+      var input = document.getElementById('searchInput');
+      var clearBtn = document.getElementById('clearSearchBtn');
+
+      input.addEventListener('input', function() {
+        clearBtn.style.display = input.value.length > 0 ? 'block' : 'none';
+        renderCatalog();
+      });
+
+      clearBtn.addEventListener('click', function() {
+        input.value = '';
+        clearBtn.style.display = 'none';
+        renderCatalog();
+        input.focus();
+      });
+    }
+
+    function renderCategories() {
+      var bar = document.getElementById('categoriesBar');
+      var cats = ['Todos'];
+      for (var i = 0; i < catalog.length; i++) {
+        var c = catalog[i].category;
+        if (c && cats.indexOf(c) === -1) {
+          cats.push(c);
+        }
+      }
+      bar.innerHTML = cats.map(function(c) {
+        return '<button class="cat-pill ' + (c === activeCategory ? 'active' : '') + '" onclick="selectCategory(\'' + c + '\')">' + c + '</button>';
+      }).join('');
+    }
+
+    function selectCategory(cat) {
+      activeCategory = cat;
+      renderCategories();
+      renderCatalog();
+    }
+
+    function formatBRL(val) {
+      var n = Number(val || 0);
+      return 'R$ ' + n.toFixed(2).replace('.', ',');
+    }
+
+    function renderCatalog() {
+      var list = document.getElementById('catalogList');
+      var query = normalizeStr(document.getElementById('searchInput').value.trim());
+
+      if (catalog.length === 0) {
+        list.innerHTML = '<div class="cart-empty" style="background: var(--bg-card); border-radius: 8px; border: 1px dashed var(--border);">Nenhum catálogo carregado.<br><br>Clique no botão <strong>"📂 Inserir Valores"</strong> no topo direito e selecione o arquivo <code>nitros_bike_catalogo.json</code>.</div>';
+        return;
+      }
+
+      var filtered = catalog.filter(function(item) {
+        var matchCat = activeCategory === 'Todos' || item.category === activeCategory;
+        if (!matchCat) return false;
+        if (!query) return true;
+        var target = normalizeStr(item.name + ' ' + item.category + ' ' + item.sku + ' ' + (item.notes || ''));
+        return target.indexOf(query) !== -1;
+      });
+
+      if (filtered.length === 0) {
+        list.innerHTML = '<div class="cart-empty">Nenhum item encontrado para essa busca.</div>';
+        return;
+      }
+
+      list.innerHTML = filtered.map(function(item) {
+        var inCart = cart.some(function(c) { return c.sku === item.sku; });
+        var priceDesc = '';
+
+        if (item.type === 'part_labor') {
+          priceDesc = 'Peça: <strong>' + formatBRL(item.price_part) + '</strong> | M.O.: <strong>' + formatBRL(item.price_labor) + '</strong> (Total: ' + formatBRL(item.price_total) + ')';
+        } else if (item.type === 'labor_only') {
+          priceDesc = 'Mão de Obra: <strong>' + formatBRL(item.price_labor || item.price_total) + '</strong>';
+        } else {
+          priceDesc = 'Valor: <strong>' + formatBRL(item.price_total || item.price_part) + '</strong>';
+        }
+
+        return '<div class="item-card">' +
+          '<div class="item-info">' +
+            '<div class="item-top">' +
+              '<span class="item-sku">' + item.sku + '</span>' +
+              '<span class="item-cat">' + item.category + '</span>' +
+            '</div>' +
+            '<div class="item-name">' + item.name + '</div>' +
+            '<div class="item-prices">' + priceDesc + '</div>' +
+            (item.notes ? '<div class="item-note">⚠️ ' + item.notes + '</div>' : '') +
+          '</div>' +
+          '<button class="btn-add" ' + (inCart ? 'disabled' : '') + ' onclick="addToCart(\'' + item.sku + '\')">' +
+            (inCart ? '✓ No Carrinho' : '+ Adicionar') +
+          '</button>' +
+        '</div>';
+      }).join('');
+    }
+
+    function addToCart(sku) {
+      if (cart.some(function(c) { return c.sku === sku; })) return;
+      var item = null;
+      for (var i = 0; i < catalog.length; i++) {
+        if (catalog[i].sku === sku) { item = catalog[i]; break; }
+      }
+      if (!item) return;
+
+      cart.push({
+        sku: item.sku,
+        qty: 1,
+        includeLabor: false
+      });
+
+      hideOutputBox();
+      renderCatalog();
+      updateCartUI();
+    }
+
+    function changeQty(sku, delta) {
+      var idx = -1;
+      for (var i = 0; i < cart.length; i++) {
+        if (cart[i].sku === sku) { idx = i; break; }
+      }
+      if (idx === -1) return;
+
+      cart[idx].qty += delta;
+      if (cart[idx].qty <= 0) {
+        cart.splice(idx, 1);
+      }
+      hideOutputBox();
+      renderCatalog();
+      updateCartUI();
+    }
+
+    function toggleItemLabor(sku, checked) {
+      for (var i = 0; i < cart.length; i++) {
+        if (cart[i].sku === sku) {
+          cart[i].includeLabor = checked;
+          break;
+        }
+      }
+      hideOutputBox();
+      updateCartUI();
+    }
+
+    function removeFromCart(sku) {
+      cart = cart.filter(function(c) { return c.sku !== sku; });
+      hideOutputBox();
+      renderCatalog();
+      updateCartUI();
+    }
+
+    function clearCart() {
+      if (cart.length === 0) return;
+      cart = [];
+      modActive = false;
+      document.getElementById('modBox').classList.remove('show');
+      document.getElementById('modToggleBtn').classList.remove('active');
+      document.getElementById('modReason').value = '';
+      document.getElementById('modValue').value = '';
+      hideOutputBox();
+      renderCatalog();
+      updateCartUI();
+    }
+
+    function setServiceType(type) {
+      serviceType = type;
+      document.getElementById('btnTypeOS').classList.toggle('active', type === 'OS');
+      document.getElementById('btnTypeSR').classList.toggle('active', type === 'SR');
+      hideOutputBox();
+    }
+
+    function toggleModificationBox() {
+      modActive = !modActive;
+      document.getElementById('modBox').classList.toggle('show', modActive);
+      document.getElementById('modToggleBtn').classList.toggle('active', modActive);
+      if (!modActive) {
+        document.getElementById('modReason').value = '';
+        document.getElementById('modValue').value = '';
+      }
+      hideOutputBox();
+      updateCartUI();
+    }
+
+    function setModType(type) {
+      modType = type;
+      document.getElementById('btnModDiscount').classList.toggle('active', type === 'discount');
+      document.getElementById('btnModSurcharge').classList.toggle('active', type === 'surcharge');
+      hideOutputBox();
+      updateCartUI();
+    }
+
+    function setPayment(method, btnEl) {
+      paymentMethod = method;
+      var btns = document.querySelectorAll('.pay-btn');
+      for (var i = 0; i < btns.length; i++) {
+        btns[i].classList.remove('active');
+      }
+      btnEl.classList.add('active');
+      hideOutputBox();
+    }
+
+    function findCatalogItem(sku) {
+      for (var i = 0; i < catalog.length; i++) {
+        if (catalog[i].sku === sku) return catalog[i];
+      }
+      return null;
+    }
+
+    function getUnitPrice(catalogItem, includeLabor) {
+      if (catalogItem.type === 'labor_only') {
+        return Number(catalogItem.price_labor || catalogItem.price_total || 0);
+      }
+      if (catalogItem.type === 'part_labor') {
+        var part = Number(catalogItem.price_part || 0);
+        var labor = includeLabor ? Number(catalogItem.price_labor || 0) : 0;
+        return part + labor;
+      }
+      return Number(catalogItem.price_total || catalogItem.price_part || 0);
+    }
+
+    function calculateTotals() {
+      var itemsSubtotal = 0;
+      for (var i = 0; i < cart.length; i++) {
+        var c = cart[i];
+        var item = findCatalogItem(c.sku);
+        if (!item) continue;
+        itemsSubtotal += getUnitPrice(item, c.includeLabor) * c.qty;
+      }
+
+      var modVal = 0;
+      if (modActive) {
+        var raw = parseFloat(document.getElementById('modValue').value);
+        if (!isNaN(raw) && raw > 0) {
+          modVal = modType === 'discount' ? -raw : raw;
+        }
+      }
+
+      var finalTotal = Math.max(0, itemsSubtotal + modVal);
+      return { itemsSubtotal: itemsSubtotal, modVal: modVal, finalTotal: finalTotal };
+    }
+
+    function updateCartUI() {
+      var container = document.getElementById('cartItemsList');
+      var totalItemsCount = 0;
+      for (var i = 0; i < cart.length; i++) {
+        totalItemsCount += cart[i].qty;
+      }
+      document.getElementById('mobCartCount').textContent = totalItemsCount;
+
+      if (cart.length === 0) {
+        container.innerHTML = '<div class="cart-empty">O carrinho está vazio.<br>Pesquise e adicione itens no Catálogo.</div>';
+      } else {
+        container.innerHTML = cart.map(function(c) {
+          var item = findCatalogItem(c.sku);
+          if (!item) return '';
+          var unitPrice = getUnitPrice(item, c.includeLabor);
+          var itemSub = unitPrice * c.qty;
+
+          var laborHtml = '';
+          if (item.type === 'part_labor') {
+            laborHtml = '<label class="labor-toggle">' +
+              '<input type="checkbox" ' + (c.includeLabor ? 'checked' : '') + ' onchange="toggleItemLabor(\'' + item.sku + '\', this.checked)">' +
+              '<span>+ M.O. (' + formatBRL(item.price_labor) + ')</span>' +
+            '</label>';
+          } else {
+            laborHtml = '<span style="font-size: 0.76rem; color: var(--text-muted);">' +
+              (item.type === 'labor_only' ? 'Só Mão de Obra' : 'Valor fechado') +
+            '</span>';
+          }
+
+          return '<div class="cart-item">' +
+            '<div class="cart-item-header">' +
+              '<div class="cart-item-name">' + item.name + '</div>' +
+              '<div class="cart-item-subtotal">' + formatBRL(itemSub) + '</div>' +
+            '</div>' +
+            '<div class="cart-item-controls">' +
+              '<div class="qty-control">' +
+                '<button class="qty-btn" onclick="changeQty(\'' + item.sku + '\', -1)">−</button>' +
+                '<span class="qty-val">' + c.qty + '</span>' +
+                '<button class="qty-btn" onclick="changeQty(\'' + item.sku + '\', 1)">+</button>' +
+              '</div>' +
+              laborHtml +
+              '<button class="btn-remove-item" onclick="removeFromCart(\'' + item.sku + '\')">Remover</button>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+      }
+
+      var totals = calculateTotals();
+      document.getElementById('cartTotalDisplay').textContent = formatBRL(totals.finalTotal);
+    }
+
+    function generateSummaryText() {
+      if (cart.length === 0) {
+        alert('Adicione pelo menos um item no carrinho antes de finalizar.');
+        return;
+      }
+
+      var attendant = localStorage.getItem(KEY_USER) || 'Atendente';
+      var srNum = padZero(getSrCounter());
+      var headerLabel = serviceType === 'SR' ? ('Serviço Rápido #' + srNum) : 'Ordem de Serviço';
+
+      var itemsStrings = cart.map(function(c) {
+        var item = findCatalogItem(c.sku);
+        var sub = getUnitPrice(item, c.includeLabor) * c.qty;
+        var laborTag = '';
+        if (item.type === 'part_labor') {
+          laborTag = c.includeLabor ? ' c/ M.O.' : ' s/ M.O.';
+        }
+        return c.qty + 'x ' + item.name + laborTag + ' (' + formatBRL(sub) + ')';
+      });
+
+      var totals = calculateTotals();
+      var modSegment = '';
+
+      if (modActive && totals.modVal !== 0) {
+        var reason = document.getElementById('modReason').value.trim() || 'Ajuste manual';
+        var sign = totals.modVal < 0 ? '-' : '+';
+        var label = totals.modVal < 0 ? 'Desconto' : 'Acréscimo';
+        modSegment = ' | ' + label + ' (' + reason + '): ' + sign + formatBRL(Math.abs(totals.modVal));
+      }
+
+      var singleLine = (headerLabel + ' - Itens: ' + itemsStrings.join(', ') + modSegment + ' | Total: ' + formatBRL(totals.finalTotal) + ' | Pagamento: ' + paymentMethod + ' | Atendente: ' + attendant)
+        .replace(/[\r\n]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      var outBox = document.getElementById('outputBox');
+      var outText = document.getElementById('outputText');
+      outText.textContent = singleLine;
+      outBox.classList.add('show');
+    }
+
+    function hideOutputBox() {
+      document.getElementById('outputBox').classList.remove('show');
+    }
+
+    function copyTextToClipboard(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text);
+      } else {
+        var temp = document.createElement('textarea');
+        temp.value = text;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+      }
+    }
+
+    function copyOnly() {
+      var text = document.getElementById('outputText').textContent;
+      if (!text) return;
+      copyTextToClipboard(text);
+      alert('Texto copiado para a área de transferência!');
+    }
+
+    function copyAndFinish() {
+      var text = document.getElementById('outputText').textContent;
+      if (!text) return;
+      copyTextToClipboard(text);
+
+      if (serviceType === 'SR') {
+        var nextNum = getSrCounter() + 1;
+        localStorage.setItem(KEY_SR_COUNTER, nextNum);
+        loadSrCounter();
+      }
+
+      clearCart();
+      alert('Texto copiado e atendimento concluído! Pronto para o próximo.');
+      switchMobileTab('catalog');
+    }
+
+    function switchMobileTab(tab) {
+      var catView = document.getElementById('catalogView');
+      var cartView = document.getElementById('cartView');
+      var btnCat = document.getElementById('mobTabCatalog');
+      var btnCart = document.getElementById('mobTabCart');
+
+      if (tab === 'cart') {
+        catView.classList.add('mob-hidden');
+        cartView.classList.add('mob-active');
+        btnCat.classList.remove('active');
+        btnCart.classList.add('active');
+      } else {
+        catView.classList.remove('mob-hidden');
+        cartView.classList.remove('mob-active');
+        btnCat.classList.add('active');
+        btnCart.classList.remove('active');
+      }
+      window.scrollTo(0, 0);
+    }
+  </script>
+</body>
+</html>
